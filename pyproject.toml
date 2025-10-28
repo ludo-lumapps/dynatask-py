@@ -1,0 +1,14 @@
+[project]
+name = "dynatask"
+version = "0.0.1"
+requires-python = ">=3.9"
+dependencies = [
+  "valkey == 6.1.1"
+]
+
+[project.urls]
+Homepage = "https://github.com/ludo-lumapps/dynatask-py"
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
