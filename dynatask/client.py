@@ -20,7 +20,7 @@ from .shared import (
     get_valkey,
 )
 
-MAX_PAYLOAD_SIZE = 10_000
+MAX_PAYLOAD_SIZE = 50_000
 
 
 def prep_task_params(data: bytes) -> bytes:
