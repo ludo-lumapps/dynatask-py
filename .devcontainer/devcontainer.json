@@ -22,5 +22,5 @@
 			}
 		}
 	},
-	"postStartCommand": "sudo valkey-server --daemonize yes"
+	"postStartCommand": "sudo service valkey-server start"
 }
