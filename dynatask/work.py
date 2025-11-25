@@ -15,16 +15,17 @@ def start_work(
     task_handler: Callable[[bytes], None],
     exit_flag: Event | None = None,
 ):
-    exit_flag = exit_flag or Event()
-
-    def time_to_exit(signal, frame):
-        info("Interrupted...")
-        exit_flag.set()
-
     info(f"Starting [{conf.job_type}] processing [{conf.local_task_type}] tasks")
-    signal(SIGINT, time_to_exit)
-    signal(SIGTERM, time_to_exit)  # K8s sends SIGTERM for graceful pod shutdown
+    if not exit_flag:
+        exit_flag = Event()
 
+        # we have to be the main thread here, to listen to CTRL-C
+        def time_to_exit(signal, frame):
+            info("Interrupted...")
+            exit_flag.set()
+
+        signal(SIGINT, time_to_exit)
+        signal(SIGTERM, time_to_exit)  # K8s sends SIGTERM for graceful pod shutdown
     global_monitor = GlobalMonitor(conf, job_is_done_handler)
     global_monitor_thread = Thread(
         target=global_monitor.start,

@@ -117,7 +117,6 @@ class GlobalMonitor:
             self.job_finished(cli, job_id)
         else:
             info(f"Job {job_id} still has tasks, so leave it running")
-        pass
 
     def monitor_jobs(self) -> None:
         job_type = self.conf.job_type
@@ -125,7 +124,7 @@ class GlobalMonitor:
         cli = get_valkey(self.conf.valkey_uri)
         if cli.cmd("SET", throttle_key, "1", "GET", "EX", "3", "NX"):
             return
-        job_ids: list[str] = cli.cmd("SMEMBERS", f"{job_type}|jobs")
+        job_ids: list[str] = cli.cmd("SMEMBERS", get_active_job_ids_key(job_type))
         for job_id in job_ids:
             cli.cmd("SETEX", throttle_key, "3", "1")
             self.monitor_job(cli, int(job_id))
