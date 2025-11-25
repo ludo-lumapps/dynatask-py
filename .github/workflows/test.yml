@@ -10,6 +10,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    services:
+      valkey:
+        image: valkey/valkey:9.0.0-alpine
+        # Map port 6379 on the container to port 6379 on the Docker host
+        ports:
+          - 6379:6379
+        # Health check to ensure valkey is up before running tests
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     strategy:
       matrix:
         python-version: ["3.14"] # Test against one or more versions
@@ -33,3 +47,5 @@ jobs:
       # 4. Run the tests
       - name: Run pytest
         run: pytest
+        env:
+          REDIS_URL: redis://127.0.0.1:6379/
