@@ -13,11 +13,17 @@ def get_valkey(uri: str):
 
 
 class WorkConf:
-    def __init__(self, valkey_uri: str, job_type: str, local_task_type: str):
+    def __init__(
+        self,
+        valkey_uri: str,
+        job_type: str,
+        local_task_type: str,
+        task_types: list[str] | None = None,
+    ):
         self.valkey_uri = valkey_uri
         self.job_type = job_type
         self.local_task_type = local_task_type
-        self.task_types = [local_task_type]
+        self.task_types = task_types or [local_task_type]
         self.consumer = getenv("HOSTNAME") or "consumer-1"
         self.max_task_attempts = 1
         self.max_tasks_per_job = 10
