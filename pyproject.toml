@@ -2,7 +2,7 @@
 name = "dynatask"
 version = "0.0.1"
 requires-python = ">=3.10"
-dependencies = ["valkey == 6.1.1"]
+dependencies = ["valkey == 6.2.0rc1"]
 
 [project.urls]
 Homepage = "https://github.com/ludo-lumapps/dynatask-py"
