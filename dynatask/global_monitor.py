@@ -19,8 +19,7 @@ from .shared import (
 
 @dataclass
 class FinishedJobInfo:
-    job_type: str
-    job_id: int
+    id: int
     started_at: str
     tasks_added: int
     tasks_read: int
@@ -53,7 +52,6 @@ class GlobalMonitor:
         pipe.execute()
         if f := self.job_is_done_handler:
             job_info = FinishedJobInfo(
-                job_type,
                 job_id,
                 job_stats.started_at,
                 job_stats.tasks_added,
