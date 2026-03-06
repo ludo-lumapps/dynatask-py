@@ -19,7 +19,7 @@ from .shared import (
 
 @dataclass
 class FinishedJobInfo:
-    id: int
+    id: str
     started_at: str
     tasks_added: int
     tasks_read: int
@@ -36,7 +36,7 @@ class GlobalMonitor:
         self.conf = conf
         self.job_is_done_handler = job_is_done_handler
 
-    def job_finished(self, cli: MyValkey, job_id: int) -> None:
+    def job_finished(self, cli: MyValkey, job_id: str) -> None:
         job_type = self.conf.job_type
         job_stats = get_job_stats(cli, job_type, job_id)
         streams = [get_stream_key(job_type, job_id, tt) for tt in self.conf.task_types]
@@ -61,7 +61,7 @@ class GlobalMonitor:
             )
             f(job_info)
 
-    def job_is_done(self, cli: MyValkey, job_id: int) -> bool:
+    def job_is_done(self, cli: MyValkey, job_id: str) -> bool:
         job_type = self.conf.job_type
         streams = [get_stream_key(job_type, job_id, tt) for tt in self.conf.task_types]
         pipe = cli.pipeline()
@@ -108,7 +108,7 @@ class GlobalMonitor:
                 return False
         return True
 
-    def monitor_job(self, cli: MyValkey, job_id: int) -> None:
+    def monitor_job(self, cli: MyValkey, job_id: str) -> None:
         info(f"Monitoring job {job_id}")
         if self.job_is_done(cli, job_id):
             info(f"Job {job_id} has nothing left to do, time to end it")
@@ -125,7 +125,7 @@ class GlobalMonitor:
         job_ids: list[str] = cli.cmd("SMEMBERS", get_active_job_ids_key(job_type))
         for job_id in job_ids:
             cli.cmd("SETEX", throttle_key, "3", "1")
-            self.monitor_job(cli, int(job_id))
+            self.monitor_job(cli, job_id)
 
     def start(self, exit_flag: Event):
         info("Starting global jobs monitor")

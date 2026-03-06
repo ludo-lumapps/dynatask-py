@@ -26,7 +26,7 @@ from .shared import (
 
 @dataclass
 class QueuedTask:
-    job_id: int
+    job_id: str
     task_id: str
     payload: dict[str, bytes]
 
@@ -35,7 +35,7 @@ def xack_entry(
     cli: MyValkey,
     job_type: str,
     local_task_type: str,
-    job_id: int,
+    job_id: str,
     task_id: str,
     spans: list[str] | None,
     finished_ok: bool,
@@ -82,7 +82,7 @@ def process_task(
     task_context: TaskContext,
     params: bytes,
     th: Callable[[bytes], None],
-    running_task_ids: dict[int, list[str]],
+    running_task_ids: dict[str, list[str]],
     running_task_ids_lock: Lock,
 ):
     TASK_LOCAL.task_context = task_context
@@ -138,7 +138,7 @@ class WorkDispatcher:
         self.stopping_job_ids_key = get_stopping_job_ids_key(conf.job_type)
 
     def clear_abandoned_tasks_of_stopping_job(
-        self, cli: MyValkey, job_id: int, stream: str
+        self, cli: MyValkey, job_id: str, stream: str
     ) -> None:
         # we don't need to handle spans when a job is stopping
         # just xack abandoned tasks
@@ -161,7 +161,7 @@ class WorkDispatcher:
         self,
         cli: MyValkey,
         free_slots: int,
-        job_id: int,
+        job_id: str,
         stream: str,
         qts: list[QueuedTask],
     ) -> None:
@@ -222,7 +222,7 @@ class WorkDispatcher:
         self,
         cli: MyValkey,
         free_slots: int,
-        job_id: int,
+        job_id: str,
         stream: str,
         qts: list[QueuedTask],
     ) -> None:
@@ -295,7 +295,7 @@ class WorkDispatcher:
             str(read_count),
         )
 
-    def is_stopping(self, cli: MyValkey, job_id: int) -> bool:
+    def is_stopping(self, cli: MyValkey, job_id: str) -> bool:
         return bool(cli.cmd("SISMEMBER", self.stopping_job_ids_key, job_id))
 
     def get_next_tasks(self, free_slots: int) -> list[QueuedTask] | None:

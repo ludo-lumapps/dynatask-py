@@ -30,7 +30,7 @@ class WorkConf:
         self.thread_count = 10
 
 
-def get_stream_key(job_type: str, job_id: int, task_type: str) -> str:
+def get_stream_key(job_type: str, job_id: str, task_type: str) -> str:
     return f"{job_type}|{job_id}|{task_type}|stream"
 
 
@@ -46,11 +46,11 @@ def get_stopping_job_ids_key(job_type: str) -> str:
     return f"{job_type}|stopping_jobs"
 
 
-def get_job_stats_key(job_type: str, job_id: int) -> str:
+def get_job_stats_key(job_type: str, job_id: str) -> str:
     return f"{job_type}|{job_id}|stats"
 
 
-def get_job_spans_key(job_type: str, job_id: int) -> str:
+def get_job_spans_key(job_type: str, job_id: str) -> str:
     return f"{job_type}|{job_id}|spans"
 
 
@@ -63,7 +63,7 @@ class JobStats:
     tasks_done_err: int
 
 
-def get_job_stats(cli: MyValkey, job_type: str, job_id: int) -> JobStats:
+def get_job_stats(cli: MyValkey, job_type: str, job_id: str) -> JobStats:
     if not cli.cmd("SISMEMBER", get_active_job_ids_key(job_type), job_id):
         return JobStats("", 0, 0, 0, 0)
     stats_key = get_job_stats_key(job_type, job_id)
@@ -83,7 +83,7 @@ def get_job_stats(cli: MyValkey, job_type: str, job_id: int) -> JobStats:
 class TaskContext:
     valkey_uri: str
     job_type: str
-    job_id: int
+    job_id: str
     task_id: str
     task_type: str
     spans: list[str] | None

@@ -32,7 +32,7 @@ def prep_task_params(data: bytes) -> bytes:
 
 def add_task_to_pipeline(
     job_type: str,
-    job_id: int,
+    job_id: str,
     stream: str,
     stats_key: str,
     data: bytes,
@@ -69,7 +69,7 @@ class Client:
         self.active_job_ids_key = get_active_job_ids_key(job_type)
         self.stopping_job_ids_key = get_stopping_job_ids_key(job_type)
 
-    def start_job(self, job_id: int, task_type: str, data: bytes):
+    def start_job(self, job_id: str, task_type: str, data: bytes):
         job_type = self.job_type
         # 1- grab a lock
         lock_key = f"stream-creation|{job_type}|{job_id}"
@@ -105,7 +105,7 @@ class Client:
             f"to stream {stream} of job {job_id}, size {pl_len}"
         )
 
-    def stop_job(self, job_id: int) -> bool:
+    def stop_job(self, job_id: str) -> bool:
         cli = get_valkey(self.valkey_uri)
         if cli.cmd("SISMEMBER", self.active_job_ids_key, job_id):
             cli.cmd("SADD", self.stopping_job_ids_key, job_id)
@@ -113,11 +113,11 @@ class Client:
         else:
             return False
 
-    def job_is_running(self, job_id: int) -> bool:
+    def job_is_running(self, job_id: str) -> bool:
         cli = get_valkey(self.valkey_uri)
         return bool(cli.cmd("SISMEMBER", self.active_job_ids_key, job_id))
 
-    def get_job_stats(self, job_id: int) -> JobStats:
+    def get_job_stats(self, job_id: str) -> JobStats:
         cli = get_valkey(self.valkey_uri)
         return get_job_stats(cli, self.job_type, job_id)
 
