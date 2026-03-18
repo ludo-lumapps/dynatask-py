@@ -134,7 +134,27 @@ class InTaskContext:
     """
 
     @staticmethod
-    def add_task(task_type: str, data: bytes, track: bool) -> None:
+    def add_tasks(task_type: str, tasks: list[tuple[bytes, bool]]) -> None:
+        task_context: TaskContext = TASK_LOCAL.task_context
+        job_type = task_context.job_type
+        job_id = task_context.job_id
+        stream = get_stream_key(job_type, job_id, task_type)
+        stats_key = get_job_stats_key(job_type, job_id)
+        cli = get_valkey(task_context.valkey_uri)
+        pipe = cli.pipeline()
+        parent_spans = task_context.spans
+        for data, track in tasks:
+            sub_task_spans = list(parent_spans) if parent_spans else []
+            if track:
+                sub_task_spans.append(task_context.task_id)
+            add_task_to_pipeline(
+                job_type, job_id, stream, stats_key, data, sub_task_spans, pipe
+            )
+        pipe.execute()
+        info(f"Added {len(tasks)} tasks to stream {stream}")
+
+    @staticmethod
+    def add_task(task_type: str, data: bytes, track: bool) -> str:
         task_context: TaskContext = TASK_LOCAL.task_context
         job_type = task_context.job_type
         job_id = task_context.job_id
@@ -148,12 +168,13 @@ class InTaskContext:
             sub_task_spans.extend(parent_spans)
         if track:
             sub_task_spans.append(task_context.task_id)
-        pl_len = add_task_to_pipeline(
+        payload_size = add_task_to_pipeline(
             job_type, job_id, stream, stats_key, data, sub_task_spans, pipe
         )
         res = pipe.execute()
         entry_id = res[-1]  # XADD ... -> '1756815635488-0'
-        info(f"Added {entry_id} to stream {stream}, size {pl_len}")
+        info(f"Added {entry_id} to stream {stream}, size {payload_size}")
+        return entry_id
 
     @staticmethod
     def job_is_stopping() -> bool:
