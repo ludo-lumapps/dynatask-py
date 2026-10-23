@@ -34,7 +34,7 @@ def start_work(
     )
     global_monitor_thread.start()
 
-    running_task_ids: dict[int, list[str]] = {}
+    running_task_ids: dict[str, list[str]] = {}
     running_task_ids_lock = Lock()
     local_monitor = LocalMonitor(
         conf.valkey_uri,

@@ -117,8 +117,8 @@ def test_with_tasks_tracking():
     item_count_orig = 10
     new_msg = TaskMessage(TaskContext(job_id, counter_key), FooAll(item_count_orig))
     jobs_client = Client(VALKEY_URI, JOB_TYPE, [LOCAL_TASK_TYPE])
-    jobs_client.start_job(job_id, LOCAL_TASK_TYPE, msgspec.json.encode(new_msg))
-    while jobs_client.job_is_running(job_id):
+    jobs_client.start_job(str(job_id), LOCAL_TASK_TYPE, msgspec.json.encode(new_msg))
+    while jobs_client.job_is_running(str(job_id)):
         sleep(1)
     exit_flag.set()
     debug("Waiting for worker to exit")

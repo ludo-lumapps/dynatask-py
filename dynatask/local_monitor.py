@@ -11,7 +11,7 @@ class LocalMonitor:
         job_type: str,
         local_task_type: str,
         consumer: str,
-        running_task_ids: dict[int, list[str]],
+        running_task_ids: dict[str, list[str]],
         running_task_ids_lock: Lock,
     ):
         self.valkey_uri = valkey_uri

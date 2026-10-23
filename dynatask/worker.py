@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from logging import debug, exception, info, warning
 from random import shuffle
 from threading import Event, Lock, Thread
-from typing import Callable
+from collections.abc import Callable
 from zlib import decompress
 
 from valkey import ResponseError, WatchError
@@ -127,7 +127,7 @@ class WorkDispatcher:
     def __init__(
         self,
         conf: WorkConf,
-        running_task_ids: dict[int, list[str]],
+        running_task_ids: dict[str, list[str]],
         running_task_ids_lock: Lock,
         task_handler: Callable[[bytes], None],
     ):
@@ -345,11 +345,14 @@ class WorkDispatcher:
             else:
                 debug(f"Task {task_id} has no spans")
             err_msg = None
+            params = None
             try:
-                if not (params := get_task_data(qt.payload)):
+                params = get_task_data(qt.payload)
+                if not params:
                     err_msg = "payload missing from entry"
             except Exception as err:
                 err_msg = f"Error '{err}' parsing payload of {task_id}"
+
             if err_msg:
                 warning(err_msg)
                 try:
@@ -357,6 +360,7 @@ class WorkDispatcher:
                 except Exception as err:
                     warning(f"Error XACK'ing task {task_id} of job {job_id}: {err}")
                 continue
+
             trace_id = f"trace-worker-{consumer}-job-{job_id}-task-{task_id}"
             task_context = TaskContext(
                 valkey_uri, job_type, job_id, task_id, task_type, spans

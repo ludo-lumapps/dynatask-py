@@ -12,4 +12,15 @@ requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
 [project.optional-dependencies]
-test = ["pytest", "msgspec"]
+test = ["pytest", "msgspec", "pyright"]
+
+[tool.ruff]
+target-version = "py314"
+
+[tool.ruff.lint]
+# Explicitly clamp Ruff down to ONLY standard Pycodestyle (E) and Pyflakes (F).
+# This acts as a strict boundary that the VS Code extension cannot cross.
+select = ["E", "F"]
+
+[tool.pyright]
+exclude = ["tests"]
