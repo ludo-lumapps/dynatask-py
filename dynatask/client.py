@@ -134,6 +134,11 @@ class InTaskContext:
     """
 
     @staticmethod
+    def get_task_id() -> str:
+        task_context: TaskContext = TASK_LOCAL.task_context
+        return task_context.task_id
+
+    @staticmethod
     def add_tasks(task_type: str, tasks: list[tuple[bytes, bool]]) -> None:
         task_context: TaskContext = TASK_LOCAL.task_context
         job_type = task_context.job_type
