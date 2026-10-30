@@ -79,12 +79,15 @@ class Task:
 
 
 def test_1():
-    data = b'{"context": {"project_id": -1, "counter_key": "FOO"}, "method": {"name": "FooAll", "item_count": 4}}'
+    data = (
+        b'{"context": {"project_id": -1, "counter_key": "FOO"}, '
+        b'"method": {"name": "FooAll", "item_count": 4}}'
+    )
     t = msgspec.json.decode(data, type=TaskMessage)
     assert t.context.project_id == -1
     ok = False
     match t.method:
-        case FooAll(_foo):
+        case FooAll(_):
             ok = True
     assert ok
 
